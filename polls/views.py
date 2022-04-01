@@ -1,26 +1,28 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.views import generic
 from sorcery import dict_of
-
 
 from polls.models import Choice, Question
 
 
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    context = dict_of(latest_question_list)
-    return render(request, 'polls/index.html', context)
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_question_list'
+
+    def get_queryset(self):
+        return Question.objects.order_by('-pub_date')[:5]
 
 
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/detail.html', dict_of(question))
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = 'polls/detail.html'
 
 
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/results.html', {'question': question})
+class ResultView(generic.DetailView):
+    model = Question
+    template_name = 'polls/results.html'
 
 
 def vote(request, question_id):
