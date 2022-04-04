@@ -1,5 +1,6 @@
 import datetime
 
+from astroid.protocols import arguments_assigned_stmts
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
@@ -63,7 +64,10 @@ class QuestionIndexViewTest(TestCase):
         response = self.client.get(reverse('polls:index'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No polls are available.")
-        self.assertQuerysetEqual(response.context['latest_question_list'], [])
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],
+            [],
+        )
 
     def test_past_question(self):
         """
@@ -85,7 +89,10 @@ class QuestionIndexViewTest(TestCase):
         create_question(question_text="Future question.", days=30)
         response = self.client.get(reverse('polls:index'))
         self.assertContains(response, "No polls are available.")
-        self.assertQuerysetEqual(response.context['latest_question_list'], [])
+        self.assertQuerysetEqual(
+            response.context['latest_question_list'],
+            [],
+        )
 
     def test_future_question_and_past_question(self):
         """
@@ -111,3 +118,24 @@ class QuestionIndexViewTest(TestCase):
             response.context['latest_question_list'],
             [question2, question1],
         )
+
+
+class QuestionDetailViewTest(TestCase):
+    def test_future_question(self):
+        """
+
+        """
+        future_question = create_question("Future question", 5)
+        url = reverse('polls:detail', args=(future_question.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_past_question(self):
+        """
+        The detail view of a question with a pub_date in the past
+        displays the question's text.
+        """
+        past_question = create_question(question_text='Past Question.', days=-5)
+        url = reverse('polls:detail', args=(past_question.id,))
+        response = self.client.get(url)
+        self.assertContains(response, past_question.question_text)
