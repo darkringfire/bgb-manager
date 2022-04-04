@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('addr/', include('addr.urls')),
     path('polls/', include('polls.urls')),
+    path('kladr/', include('kladr.urls')),
 ]
