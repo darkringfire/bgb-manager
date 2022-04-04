@@ -2,7 +2,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
-from sorcery import dict_of
 from django.utils import timezone
 
 from polls.models import Choice, Question
@@ -37,7 +36,11 @@ def vote(request, question_id):
         return render(
             request,
             'polls/detail.html',
-            dict_of(question, error_message="You didn't select a choice.")
+            {
+                'question': question,
+                'error_message': "You didn't select a choice."
+            }
+
         )
     else:
         selected_choice.votes += 1
